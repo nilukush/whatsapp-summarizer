@@ -3,6 +3,11 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 const app = express();
 app.use(cors());
@@ -51,7 +56,11 @@ app.get('/webhook', (req, res) => {
 app.post('/webhook', async (req, res) => {
   const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   if (message) {
-    await redisClient.lPush('message_queue', JSON.stringify(message));
+    await supabase
+      .from('message_queue')
+      .insert([{ content: message }]);
   }
   res.sendStatus(200);
 });
+
+app.listen(3000, () => console.log('Server running on port 3000'));

@@ -4,7 +4,7 @@ services:
   github:
     branch: main
     deploy_on_push: true
-    repo: your-username/whatsapp-summarizer-backend
+    repo: nilukush/whatsapp-summarizer-backend
   http_port: 3000
   instance_count: 1
   instance_size_slug: basic-xxs

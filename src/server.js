@@ -1,4 +1,7 @@
 const express = require('express');
+// Add this line after initializing Express
+app.use(express.json()); // Parse JSON bodies
+
 const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
@@ -73,26 +76,29 @@ app.get('/webhook', (req, res) => {
 // Handle Messages (POST)
 app.post('/webhook', async (req, res) => {
   try {
-    console.log('Incoming payload:', JSON.stringify(req.body, null, 2)); // Add this line
-    const entry = req.body.entry?.[0];
-    const changes = entry?.changes?.[0];
+    console.log('Incoming payload:', req.body); // Log the parsed body
 
-    if (changes?.field === 'messages') {
+    // Validate payload structure
+    if (!req.body?.entry?.[0]?.changes?.[0]) {
+      throw new Error('Invalid payload structure');
+    }
+
+    const entry = req.body.entry[0];
+    const changes = entry.changes[0];
+
+    if (changes.field === 'messages') {
       const message = changes.value.messages?.[0];
       if (message) {
-        console.log('Storing message:', message.id); // Add this line
+        console.log('Storing message:', message.id);
         const { error } = await supabase
           .from('message_queue')
           .insert([{ content: message }]);
-        if (error) {
-          console.error('Supabase error:', error); // Detailed Supabase error
-          throw error;
-        }
+        if (error) throw error;
       }
     }
     res.sendStatus(200);
   } catch (error) {
-    console.error('Webhook error:', error); // This should now show more details
+    console.error('Webhook error:', error.message);
     res.sendStatus(500);
   }
 });

@@ -55,13 +55,3 @@ app.post('/webhook', async (req, res) => {
   }
   res.sendStatus(200);
 });
-
-const redis = require('redis');
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL,
-  password: process.env.REDIS_PASSWORD,
-});
-
-redisClient.connect().then(() => logger.info('Redis connected!'));
-
-app.listen(3000, () => logger.info('Server running on port 3000'));

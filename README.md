@@ -1,1 +1,1 @@
-# whatsapp-summarizer
+# whatsapp-summarizer-backend

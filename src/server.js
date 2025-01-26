@@ -1,7 +1,4 @@
 const express = require('express');
-// Add this line after initializing Express
-app.use(express.json()); // Parse JSON bodies
-
 const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
@@ -15,6 +12,8 @@ const app = express();
 app.use(cors({
   exposedHeaders: ['x-request-id']
 }));
+// Add this line after initializing Express
+app.use(express.json()); // Parse JSON bodies
 
 const logger = require('./config/logger');
 // Add startup logging

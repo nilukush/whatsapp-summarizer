@@ -1,4 +1,3 @@
-const logger = require('./config/logger');
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -11,6 +10,21 @@ const supabase = createClient(
 
 const app = express();
 app.use(cors());
+
+const logger = require('./config/logger');
+// Add startup logging
+console.log('Starting server...');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Port:', process.env.PORT);
+
+// Add error handling
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled Rejection:', error);
+});
 
 // WhatsApp OAuth Configuration
 const WA_CLIENT_ID = process.env.WA_CLIENT_ID;
@@ -63,4 +77,7 @@ app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+// Start server
+const server = app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+  console.log(`Server is running on port ${server.address().port}`);
+});

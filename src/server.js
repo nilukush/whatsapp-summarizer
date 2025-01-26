@@ -9,7 +9,9 @@ const supabase = createClient(
 );
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ['x-request-id']
+}));
 
 const logger = require('./config/logger');
 // Add startup logging
@@ -71,26 +73,40 @@ app.get('/webhook', (req, res) => {
 // Handle Messages (POST)
 app.post('/webhook', async (req, res) => {
   try {
+    console.log('Incoming payload:', JSON.stringify(req.body, null, 2)); // Add this line
     const entry = req.body.entry?.[0];
     const changes = entry?.changes?.[0];
 
-    // Verify this is a WhatsApp message event
     if (changes?.field === 'messages') {
       const message = changes.value.messages?.[0];
       if (message) {
-        // Store in Supabase
+        console.log('Storing message:', message.id); // Add this line
         const { error } = await supabase
           .from('message_queue')
           .insert([{ content: message }]);
-
-        if (error) throw error;
-        console.log('Message stored:', message.id);
+        if (error) {
+          console.error('Supabase error:', error); // Detailed Supabase error
+          throw error;
+        }
       }
     }
     res.sendStatus(200);
   } catch (error) {
-    console.error('Webhook error:', error);
+    console.error('Webhook error:', error); // This should now show more details
     res.sendStatus(500);
+  }
+});
+
+app.post('/test-supabase', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('message_queue')
+      .insert([{ content: { id: "test", text: "Hello" } }]);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Test Supabase error:', error);
+    res.status(500).send(error.message);
   }
 });
 
